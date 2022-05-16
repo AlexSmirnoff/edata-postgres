@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:14.2
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: handsoff
+      POSTGRES_DB: ed
+    ports:
+      - 5432:5432
+    volumes:
+      - ed-postgres:/var/lib/postgresql/data/
+  flyway:
+    image: flyway/flyway:8.5.10
+    restart: on-failure
+    depends_on:
+      - postgres
+    command: -configFiles=/flyway/conf/flyway.config -locations=filesystem:/flyway/sql -connectRetries=60 migrate
+    volumes:
+        - ./flyway/flyway.config:/flyway/conf/flyway.config
+        - ./flyway/sql:/flyway/sql
+volumes:
+  ed-postgres:
+    driver: local
